@@ -16,15 +16,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // CRITICAL: subscribe FIRST, then getSession.
-    const { data: sub } = supabase.auth.onAuthStateChange((_event, s) => {
+    console.log("Auth: Initializing...");
+    const { data: sub } = supabase.auth.onAuthStateChange((event, s) => {
+      console.log("Auth: Event fired:", event, "User:", s?.user?.email);
       setSession(s);
       setLoading(false);
     });
+
     supabase.auth.getSession().then(({ data }) => {
-      setSession(data.session);
+      console.log("Auth: Current session fetched:", data.session ? "YES" : "NO");
+      if (data.session) setSession(data.session);
       setLoading(false);
     });
+
     return () => sub.subscription.unsubscribe();
   }, []);
 

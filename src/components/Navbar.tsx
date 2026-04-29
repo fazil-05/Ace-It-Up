@@ -29,24 +29,21 @@ export function Navbar() {
   }
 
   return (
-    <header className="sticky top-0 z-30 flex h-14 items-center justify-between border-b border-border bg-background/80 backdrop-blur px-4 md:px-6">
-      <div className="flex items-center gap-3 md:hidden">
-        <div className="grid place-items-center w-8 h-8 rounded-lg bg-gradient-primary">
-          <Sparkles className="w-4 h-4 text-primary-foreground" />
-        </div>
-        <span className="font-bold">Ace It Up</span>
+    <header className="sticky top-0 z-30 flex h-14 items-center justify-between bg-white/40 backdrop-blur-xl shadow-[0_4px_30px_rgba(0,0,0,0.05)] px-4 md:px-6">
+      <div className="flex items-center gap-3">
+        <span className="text-3xl font-black tracking-tighter text-transparent bg-clip-text bg-gradient-to-r from-sky-600 via-indigo-600 to-cyan-500 drop-shadow-sm">
+          Ace It Up
+        </span>
       </div>
-      <div className="hidden md:block text-sm text-muted-foreground">
-        Welcome back{name ? `, ${name.split(" ")[0]}` : ""} 👋
-      </div>
-      <div className="flex items-center gap-2">
+
+      <div className="flex items-center gap-2 ml-auto">
         {user && (
           <>
             <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-full bg-secondary text-xs">
               <div className="w-6 h-6 rounded-full bg-gradient-primary grid place-items-center text-[10px] font-bold text-primary-foreground">
-                {(name || user.email || "U").slice(0, 1).toUpperCase()}
+                {(user.email || "U").slice(0, 1).toUpperCase()}
               </div>
-              {name || user.email}
+              {user.email}
             </div>
             <Button variant="ghost" size="sm" onClick={logout}>
               <LogOut className="w-4 h-4 mr-1" /> Logout

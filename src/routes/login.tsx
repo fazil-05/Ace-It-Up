@@ -80,11 +80,10 @@ export function AuthShell({ title, subtitle, children }: { title: string; subtit
   return (
     <div className="min-h-screen grid lg:grid-cols-2 bg-background">
       <div className="hidden lg:flex flex-col justify-between p-10 bg-gradient-hero relative">
-        <Link to="/" className="flex items-center gap-2">
-          <div className="grid place-items-center w-9 h-9 rounded-xl bg-gradient-primary shadow-glow">
-            <Sparkles className="w-5 h-5 text-primary-foreground" />
-          </div>
-          <span className="font-bold">Ace It Up</span>
+        <Link to="/" className="flex items-center group">
+          <span className="text-3xl font-black tracking-tighter text-transparent bg-clip-text bg-gradient-to-r from-sky-600 via-indigo-600 to-cyan-500 drop-shadow-sm group-hover:scale-105 transition-all duration-300">
+            Ace It Up
+          </span>
         </Link>
         <div>
           <h2 className="text-4xl font-extrabold leading-tight">Crack placements with <span className="text-gradient">AI on your side.</span></h2>
@@ -94,9 +93,10 @@ export function AuthShell({ title, subtitle, children }: { title: string; subtit
       </div>
       <div className="flex items-center justify-center p-6">
         <div className="w-full max-w-md">
-          <div className="lg:hidden flex items-center gap-2 mb-8">
-            <div className="grid place-items-center w-9 h-9 rounded-xl bg-gradient-primary"><Sparkles className="w-5 h-5 text-primary-foreground" /></div>
-            <span className="font-bold">Ace It Up</span>
+          <div className="lg:hidden flex items-center mb-8 group">
+            <span className="text-3xl font-black tracking-tighter text-transparent bg-clip-text bg-gradient-to-r from-sky-600 via-indigo-600 to-cyan-500 drop-shadow-sm group-hover:scale-105 transition-all duration-300">
+              Ace It Up
+            </span>
           </div>
           <h1 className="text-2xl font-bold">{title}</h1>
           <p className="text-sm text-muted-foreground mt-1 mb-6">{subtitle}</p>

@@ -55,7 +55,7 @@ function Dashboard() {
     <div className="space-y-8 max-w-7xl mx-auto">
       <div>
         <h1 className="text-2xl md:text-3xl font-extrabold tracking-tight">
-          Hi {name?.split(" ")[0] ?? "there"} 👋
+          Hi {name?.split(" ")[0] ?? "there"}
         </h1>
         <p className="text-muted-foreground mt-1">Here's your placement prep snapshot.</p>
       </div>

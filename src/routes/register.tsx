@@ -33,7 +33,14 @@ function Register() {
     }
     setBusy(true);
     try {
-      await authService.signUp(email, password, name);
+      const data = await authService.signUp(email, password, name);
+      
+      // If email confirmation is enabled in Supabase, session will be null
+      if (!data.session) {
+        toast.success("Please check your email to confirm your account!");
+        return;
+      }
+
       toast.success("Account created — welcome to Ace It Up!");
       navigate({ to: "/dashboard" });
     } catch (err) {

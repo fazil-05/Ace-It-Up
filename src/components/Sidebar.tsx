@@ -13,41 +13,31 @@ export function Sidebar() {
   const { location } = useRouterState();
 
   return (
-    <aside className="hidden md:flex md:w-64 shrink-0 flex-col border-r border-sidebar-border bg-sidebar text-sidebar-foreground">
-      <Link to="/dashboard" className="flex items-center gap-2 px-6 py-5 border-b border-sidebar-border">
-        <div className="grid place-items-center w-9 h-9 rounded-xl bg-gradient-primary shadow-glow">
-          <Sparkles className="w-5 h-5 text-primary-foreground" />
-        </div>
-        <div className="leading-tight">
-          <p className="font-bold tracking-tight">Ace It Up</p>
-          <p className="text-[11px] text-muted-foreground">Placement Prep</p>
-        </div>
-      </Link>
+    <aside className="hidden md:flex flex-col bg-white/40 backdrop-blur-xl transition-all duration-300 ease-in-out w-[4.5rem] hover:w-64 z-40 group shrink-0 h-full overflow-hidden">
 
-      <nav className="flex-1 px-3 py-4 space-y-1">
+      <nav className="flex-1 px-3 py-4 space-y-2">
         {items.map(({ to, label, icon: Icon }) => {
           const active = location.pathname === to || location.pathname.startsWith(to + "/");
           return (
             <Link
               key={to}
               to={to}
-              className={`group flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all ${
+              className={`flex items-center rounded-xl px-3 py-3 text-sm font-medium transition-all whitespace-nowrap ${
                 active
                   ? "bg-gradient-primary text-primary-foreground shadow-glow"
                   : "text-sidebar-foreground/80 hover:text-sidebar-foreground hover:bg-sidebar-accent"
               }`}
             >
-              <Icon className="w-4 h-4" />
-              {label}
+              <Icon className="w-5 h-5 shrink-0" />
+              <span className="ml-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300 font-semibold">
+                {label}
+              </span>
             </Link>
           );
         })}
       </nav>
 
-      <div className="m-3 rounded-xl border border-sidebar-border p-4 bg-sidebar-accent/40">
-        <p className="text-xs font-semibold">Pro tip</p>
-        <p className="text-xs text-muted-foreground mt-1">Practice 20 min daily to ace your placements.</p>
-      </div>
+
     </aside>
   );
 }

@@ -1,5 +1,5 @@
 // Shared text-based module (used by GD, Communication, Interview).
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -8,7 +8,7 @@ import { moduleService } from "@/services/moduleService";
 import { useAuth } from "@/lib/auth-context";
 import { toast } from "sonner";
 import { FeedbackPanel } from "@/components/FeedbackPanel";
-import { Sparkles, Loader2 } from "lucide-react";
+import { Sparkles, Loader2, Mic, Square } from "lucide-react";
 import type { Database } from "@/integrations/supabase/types";
 
 type ModuleKey = Database["public"]["Enums"]["module_key"];
@@ -36,8 +36,71 @@ export function TextPracticeCard({
   const [busy, setBusy] = useState(false);
   const [startedAt, setStartedAt] = useState<number>(() => Date.now());
 
+  const [isRecording, setIsRecording] = useState(false);
+  const recognitionRef = useRef<any>(null);
+
   // Reset timer when prompt changes.
-  useEffect(() => { setStartedAt(Date.now()); setFb(null); setText(""); }, [prompt]);
+  useEffect(() => { 
+    setStartedAt(Date.now()); 
+    setFb(null); 
+    setText(""); 
+    if (isRecording && recognitionRef.current) {
+      recognitionRef.current.stop();
+      setIsRecording(false);
+    }
+  }, [prompt]);
+
+  const toggleRecording = () => {
+    if (isRecording) {
+      recognitionRef.current?.stop();
+      setIsRecording(false);
+      return;
+    }
+
+    const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+    if (!SpeechRecognition) {
+      toast.error("Your browser doesn't support speech recognition. Try Chrome or Edge.");
+      return;
+    }
+
+    const recognition = new SpeechRecognition();
+    recognition.continuous = true;
+    recognition.interimResults = true;
+    
+    let originalText = text;
+    if (originalText.trim() && !originalText.endsWith(" ")) {
+        originalText += " ";
+    }
+    
+    recognition.onresult = (event: any) => {
+      let finalTranscript = "";
+      let interimTranscript = "";
+
+      for (let i = event.resultIndex; i < event.results.length; ++i) {
+        if (event.results[i].isFinal) {
+          finalTranscript += event.results[i][0].transcript;
+        } else {
+          interimTranscript += event.results[i][0].transcript;
+        }
+      }
+      
+      originalText += finalTranscript;
+      setText(originalText + interimTranscript);
+    };
+
+    recognition.onerror = (event: any) => {
+      console.error("Speech recognition error", event.error);
+      setIsRecording(false);
+    };
+
+    recognition.onend = () => {
+      setIsRecording(false);
+    };
+
+    recognition.start();
+    recognitionRef.current = recognition;
+    setIsRecording(true);
+  };
 
   async function submit() {
     if (!text.trim() || !user) return;
@@ -92,12 +155,22 @@ export function TextPracticeCard({
           <Textarea
             value={text}
             onChange={(e) => setText(e.target.value)}
-            placeholder="Type your answer. AI will score structure, clarity, grammar, and fluency."
+            placeholder="Type your answer, or click the mic to speak. AI will score structure, clarity, grammar, and fluency."
             rows={9}
             className="resize-none"
           />
-          <p className="text-[11px] text-muted-foreground">{text.trim().split(/\s+/).filter(Boolean).length} words</p>
-          <Button onClick={submit} disabled={!text.trim() || busy} className="w-full bg-gradient-primary border-0">
+          <div className="flex items-center justify-between">
+            <p className="text-[11px] text-muted-foreground">{text.trim().split(/\s+/).filter(Boolean).length} words</p>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={toggleRecording}
+              className={`transition-all ${isRecording ? 'border-destructive text-destructive bg-destructive/10 hover:bg-destructive/20 animate-pulse' : 'hover:border-accent hover:text-accent'}`}
+            >
+              {isRecording ? <><Square className="w-4 h-4 mr-1.5" fill="currentColor" /> Stop Recording</> : <><Mic className="w-4 h-4 mr-1.5" /> Start Speaking</>}
+            </Button>
+          </div>
+          <Button onClick={submit} disabled={!text.trim() || busy || isRecording} className="w-full bg-gradient-primary border-0">
             {busy ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Sparkles className="w-4 h-4 mr-2" />}
             {busy ? "Analyzing…" : "Get AI feedback"}
           </Button>

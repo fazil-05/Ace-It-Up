@@ -1,6 +1,6 @@
 // Auth service — wraps Supabase auth + Lovable Cloud OAuth.
 import { supabase } from "@/integrations/supabase/client";
-import { lovable } from "@/integrations/lovable";
+
 
 export const authService = {
   async signUp(email: string, password: string, name: string) {
@@ -24,19 +24,23 @@ export const authService = {
   },
 
   async signInWithGoogle() {
-    const result = await lovable.auth.signInWithOAuth("google", {
-      redirect_uri: `${window.location.origin}/dashboard`,
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: "google",
+      options: {
+        redirectTo: `${window.location.origin}/dashboard`,
+      },
     });
-    if ("error" in result && result.error) throw result.error;
-    return result;
+    if (error) throw error;
   },
 
   async signInWithApple() {
-    const result = await lovable.auth.signInWithOAuth("apple", {
-      redirect_uri: `${window.location.origin}/dashboard`,
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: "apple",
+      options: {
+        redirectTo: `${window.location.origin}/dashboard`,
+      },
     });
-    if ("error" in result && result.error) throw result.error;
-    return result;
+    if (error) throw error;
   },
 
   async signOut() {

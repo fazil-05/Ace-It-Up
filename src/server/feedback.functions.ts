@@ -33,7 +33,7 @@ export const getFeedback = createServerFn({ method: "POST" })
   .inputValidator((raw: unknown) => InputSchema.parse(raw))
   .handler(async ({ data }): Promise<FeedbackResult> => {
     const wordCount = data.answer.trim().split(/\s+/).filter(Boolean).length;
-    const apiKey = process.env.LOVABLE_API_KEY;
+    const apiKey = process.env.GEMINI_API_KEY;
 
     if (!apiKey) {
       const fb = ruleBasedFeedback(data.answer);
@@ -41,14 +41,14 @@ export const getFeedback = createServerFn({ method: "POST" })
     }
 
     try {
-      const res = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+      const res = await fetch("https://generativelanguage.googleapis.com/v1beta/openai/chat/completions", {
         method: "POST",
         headers: {
           Authorization: `Bearer ${apiKey}`,
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          model: "google/gemini-3-flash-preview",
+          model: "gemini-2.0-flash",
           messages: [
             { role: "system", content: SYSTEM_PROMPTS[data.module] },
             {
@@ -189,17 +189,17 @@ export const generateAptitudeQuestions = createServerFn({ method: "POST" })
   .inputValidator((raw: unknown) => QuestionInput.parse(raw))
   .handler(async ({ data }): Promise<{ difficulty: "easy" | "medium" | "hard"; questions: AptitudeQuestion[]; source: "ai" | "fallback" }> => {
     const difficulty = pickDifficulty(data.recentAvg ?? null);
-    const apiKey = process.env.LOVABLE_API_KEY;
+    const apiKey = process.env.GEMINI_API_KEY;
     const focusTopics = (data.weakTopics?.length ? data.weakTopics : APT_TOPICS).slice(0, 6);
 
     if (!apiKey) return { difficulty, questions: fallbackBank(difficulty, data.count), source: "fallback" };
 
     try {
-      const res = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+      const res = await fetch("https://generativelanguage.googleapis.com/v1beta/openai/chat/completions", {
         method: "POST",
         headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
         body: JSON.stringify({
-          model: "google/gemini-3-flash-preview",
+          model: "gemini-2.0-flash",
           messages: [
             { role: "system", content: "You are an expert quantitative aptitude question setter for placement preparation in India. Generate fresh, unambiguous MCQs with exactly 4 options and one correct answer." },
             {
