@@ -58,7 +58,7 @@ export function TextPracticeCard({
     window.speechSynthesis.speak(utterance);
   };
 
-  const toggleRecording = () => {
+  const toggleRecording = async () => {
     if (isRecording) {
       recognitionRef.current?.stop();
       setIsRecording(false);
