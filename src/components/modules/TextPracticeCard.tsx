@@ -130,24 +130,24 @@ export function TextPracticeCard({
   }
 
   return (
-    <div className="grid gap-6 lg:grid-cols-2">
+    <div className="grid gap-6 grid-cols-1 lg:grid-cols-2">
       <Card className="shadow-card">
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">{icon} {title}</CardTitle>
+          <CardTitle className="flex items-center gap-2 text-base md:text-lg">{icon} {title}</CardTitle>
         </CardHeader>
-        <CardContent className="space-y-4">
+        <CardContent className="space-y-3 md:space-y-4">
           {before}
           {promptOptions && (
-            <div className="flex flex-wrap gap-2">
+            <div className="flex flex-wrap gap-1.5 md:gap-2">
               {promptOptions.map((p) => (
                 <button
                   key={p}
                   onClick={() => setPrompt(p)}
-                  className={`text-xs px-3 py-1.5 rounded-full border transition-all ${
+                  className={`text-xs px-2.5 md:px-3 py-1 md:py-1.5 rounded-full border transition-all ${
                     prompt === p ? "bg-gradient-primary text-primary-foreground border-transparent" : "border-border hover:border-accent"
                   }`}
                 >
-                  {p.length > 32 ? p.slice(0, 30) + "…" : p}
+                  {p.length > 28 ? p.slice(0, 26) + "…" : p}
                 </button>
               ))}
             </div>
@@ -156,18 +156,18 @@ export function TextPracticeCard({
             value={text}
             onChange={(e) => setText(e.target.value)}
             placeholder="Type your answer, or click the mic to speak. AI will score structure, clarity, grammar, and fluency."
-            rows={9}
-            className="resize-none"
+            rows={7}
+            className="resize-none text-sm"
           />
-          <div className="flex items-center justify-between">
-            <p className="text-[11px] text-muted-foreground">{text.trim().split(/\s+/).filter(Boolean).length} words</p>
+          <div className="flex items-center justify-between gap-2">
+            <p className="text-[11px] text-muted-foreground shrink-0">{text.trim().split(/\s+/).filter(Boolean).length} words</p>
             <Button
               variant="outline"
               size="sm"
               onClick={toggleRecording}
-              className={`transition-all ${isRecording ? 'border-destructive text-destructive bg-destructive/10 hover:bg-destructive/20 animate-pulse' : 'hover:border-accent hover:text-accent'}`}
+              className={`text-xs transition-all shrink-0 ${isRecording ? 'border-destructive text-destructive bg-destructive/10 hover:bg-destructive/20 animate-pulse' : 'hover:border-accent hover:text-accent'}`}
             >
-              {isRecording ? <><Square className="w-4 h-4 mr-1.5" fill="currentColor" /> Stop Recording</> : <><Mic className="w-4 h-4 mr-1.5" /> Start Speaking</>}
+              {isRecording ? <><Square className="w-3.5 h-3.5 mr-1" fill="currentColor" /> Stop</> : <><Mic className="w-3.5 h-3.5 mr-1" /> Speak</>}
             </Button>
           </div>
           <Button onClick={submit} disabled={!text.trim() || busy || isRecording} className="w-full bg-gradient-primary border-0">

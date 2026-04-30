@@ -29,30 +29,28 @@ export function Navbar() {
   }
 
   return (
-    <header className="sticky top-0 z-30 flex h-14 items-center justify-between bg-white/40 backdrop-blur-xl shadow-[0_4px_30px_rgba(0,0,0,0.05)] px-4 md:px-6">
-      <div className="flex items-center gap-3">
-        <span className="text-3xl font-black tracking-tighter text-transparent bg-clip-text bg-gradient-to-r from-sky-600 via-indigo-600 to-cyan-500 drop-shadow-sm">
+    <header className="sticky top-0 z-30 flex h-14 items-center justify-between bg-white/40 backdrop-blur-xl shadow-[0_4px_30px_rgba(0,0,0,0.05)] px-3 md:px-6">
+      <div className="flex items-center gap-2">
+        <span className="text-xl md:text-3xl font-black tracking-tighter text-transparent bg-clip-text bg-gradient-to-r from-sky-600 via-indigo-600 to-cyan-500 drop-shadow-sm">
           Ace It Up
         </span>
       </div>
 
-      <div className="flex items-center gap-2 ml-auto">
+      <div className="flex items-center gap-1.5 md:gap-2 ml-auto">
         {user && (
           <>
-            <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-full bg-secondary text-xs">
-              <div className="w-6 h-6 rounded-full bg-gradient-primary grid place-items-center text-[10px] font-bold text-primary-foreground">
-                {(user.email || "U").slice(0, 1).toUpperCase()}
+            <div className="hidden sm:flex items-center gap-2 px-2.5 py-1.5 rounded-full bg-secondary text-xs">
+              <div className="w-6 h-6 rounded-full bg-gradient-primary grid place-items-center text-[10px] font-bold text-primary-foreground shrink-0">
+                {(name || user.email || "U").slice(0, 1).toUpperCase()}
               </div>
-              {user.email}
+              <span className="hidden md:block max-w-[140px] truncate">{name || user.email}</span>
             </div>
-            <Button variant="ghost" size="sm" onClick={logout}>
-              <LogOut className="w-4 h-4 mr-1" /> Logout
+            <Button variant="ghost" size="sm" onClick={logout} className="px-2 md:px-3">
+              <LogOut className="w-4 h-4" />
+              <span className="hidden md:inline ml-1">Logout</span>
             </Button>
           </>
         )}
-        <button className="md:hidden p-2 rounded-md hover:bg-secondary" aria-label="Menu">
-          <Menu className="w-5 h-5" />
-        </button>
       </div>
     </header>
   );

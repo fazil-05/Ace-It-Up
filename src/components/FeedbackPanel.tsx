@@ -30,7 +30,7 @@ export function FeedbackPanel({ feedback, loading, emptyHint }: { feedback: Feed
               </p>
             </div>
 
-            <div className="grid grid-cols-3 gap-3">
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-2 md:gap-3">
               <Metric label="Grammar" value={feedback.grammar_score} />
               <Metric label="Clarity" value={feedback.clarity_score} />
               <Metric label="Confidence" value={feedback.confidence_score} />

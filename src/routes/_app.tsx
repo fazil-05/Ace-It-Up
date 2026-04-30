@@ -46,7 +46,7 @@ function AppLayout() {
       <Navbar />
       <div className="relative z-10 flex flex-1 w-full overflow-hidden">
         <Sidebar />
-        <main className="flex-1 overflow-y-auto p-4 md:p-8 pb-24 md:pb-8 relative">
+        <main className="flex-1 overflow-y-auto p-3 md:p-8 pb-20 md:pb-8 relative">
           <AnimatePresence mode="wait">
             <motion.div
               key={router.location.pathname}

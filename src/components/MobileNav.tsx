@@ -12,7 +12,7 @@ const items = [
 export function MobileNav() {
   const { location } = useRouterState();
   return (
-    <nav className="md:hidden fixed bottom-0 inset-x-0 z-30 border-t border-border bg-background/95 backdrop-blur">
+    <nav className="md:hidden fixed bottom-0 inset-x-0 z-30 border-t border-border bg-background/95 backdrop-blur safe-area-inset-bottom">
       <ul className="grid grid-cols-5">
         {items.map(({ to, label, icon: Icon }) => {
           const active = location.pathname === to || location.pathname.startsWith(to + "/");
@@ -20,11 +20,11 @@ export function MobileNav() {
             <li key={to}>
               <Link
                 to={to}
-                className={`flex flex-col items-center gap-1 py-2 text-[10px] ${
-                  active ? "text-accent" : "text-muted-foreground"
+                className={`flex flex-col items-center gap-1 py-3 text-[10px] font-medium transition-colors ${
+                  active ? "text-accent" : "text-muted-foreground hover:text-foreground"
                 }`}
               >
-                <Icon className="w-4 h-4" />
+                <Icon className={`w-5 h-5 transition-transform ${active ? "scale-110" : ""}`} />
                 {label}
               </Link>
             </li>

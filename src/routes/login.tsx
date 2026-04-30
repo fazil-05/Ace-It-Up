@@ -90,15 +90,17 @@ export function AuthShell({ title, subtitle, children }: { title: string; subtit
         </div>
         <div className="text-xs text-muted-foreground">© Ace It Up</div>
       </div>
-      <div className="flex items-center justify-center p-6">
+      <div className="flex items-center justify-center p-4 sm:p-6 min-h-screen lg:min-h-0">
         <div className="w-full max-w-md">
-          <div className="lg:hidden flex items-center mb-8 group">
-            <span className="text-3xl font-black tracking-tighter text-transparent bg-clip-text bg-gradient-to-r from-sky-600 via-indigo-600 to-cyan-500 drop-shadow-sm group-hover:scale-105 transition-all duration-300">
-              Ace It Up
-            </span>
+          <div className="lg:hidden flex items-center mb-6 group">
+            <Link to="/">
+              <span className="text-2xl font-black tracking-tighter text-transparent bg-clip-text bg-gradient-to-r from-sky-600 via-indigo-600 to-cyan-500 drop-shadow-sm">
+                Ace It Up
+              </span>
+            </Link>
           </div>
-          <h1 className="text-2xl font-bold">{title}</h1>
-          <p className="text-sm text-muted-foreground mt-1 mb-6">{subtitle}</p>
+          <h1 className="text-xl sm:text-2xl font-bold">{title}</h1>
+          <p className="text-sm text-muted-foreground mt-1 mb-5 md:mb-6">{subtitle}</p>
           {children}
         </div>
       </div>
