@@ -35,7 +35,13 @@ export function Aptitude() {
   };
 
   async function loadQuestions(count: number = qCount) {
-    setMode("loading"); setIdx(0); setAnswers([]); setPerQTime([]); setTime(TIME_PER_Q);
+    setMode("loading"); 
+    setIdx(0); 
+    setAnswers([]); 
+    setPerQTime([]); 
+    setTime(TIME_PER_Q);
+    setQuestions([]); // Clear current questions immediately
+
     try {
       let recentAvg: number | null = null;
       let weakTopics: string[] = [];
@@ -57,8 +63,14 @@ export function Aptitude() {
             .map((x) => x.t);
         }
       }
+      
+      // Add a timestamp to the request to prevent caching if it were an API call
       const res = await feedbackService.getAdaptiveQuestions({ recentAvg, weakTopics, count });
-      setQuestions(res.questions);
+      
+      // Robust shuffle for the questions received
+      const shuffled = [...res.questions].sort(() => Math.random() - 0.5);
+      
+      setQuestions(shuffled);
       setDifficulty(res.difficulty as "easy" | "medium" | "hard");
       setSource(res.source as "ai" | "fallback");
       qStartRef.current = Date.now();

@@ -141,12 +141,25 @@ export function TextPracticeCard({
   };
 
   async function submit() {
-    if (!text.trim() || !user) return;
+    if (!text.trim()) {
+      toast.error("Please type or speak your answer first.");
+      return;
+    }
+    if (!user) {
+      toast.error("Please login to save your progress.");
+      return;
+    }
+
     const timeSpentMs = Date.now() - startedAt;
     setBusy(true);
     setFb(null);
     try {
-      const result = await feedbackService.analyze({ module, prompt, answer: text });
+      console.log("Analyzing feedback for:", { module, prompt, textLength: text.length });
+      const result = await feedbackService.analyze({ 
+        module: module as "gd" | "communication" | "interview", 
+        prompt: prompt || "Practice Session", 
+        answer: text 
+      });
       setFb(result);
       await moduleService.saveAttempt({
         userId: user.id,

@@ -141,15 +141,20 @@ function Dashboard() {
               </div>
             ) : (
               <ul className="divide-y divide-border">
-                {attempts.slice(0, 8).map((p) => (
-                  <li key={p.id} className="flex items-center justify-between px-5 py-3 text-sm">
+                {attempts.slice(0, 20).map((p) => (
+                  <li key={p.id} className="flex items-center justify-between px-5 py-4 text-sm hover:bg-secondary/20 transition-colors group">
                     <div className="min-w-0">
-                      <p className="font-medium capitalize">{p.module}</p>
-                      <p className="text-xs text-muted-foreground line-clamp-1">{p.detail ?? "—"}</p>
+                      <div className="flex items-center gap-2">
+                        <p className="font-bold capitalize text-slate-800">{p.module}</p>
+                        {p.difficulty && <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-secondary text-muted-foreground uppercase font-bold tracking-tighter">{p.difficulty}</span>}
+                      </div>
+                      <p className="text-xs text-muted-foreground line-clamp-1 mt-0.5">{p.detail ?? "—"}</p>
                     </div>
-                    <div className="flex items-center gap-3 shrink-0">
-                      <span className="text-xs text-muted-foreground">{new Date(p.created_at).toLocaleDateString()}</span>
-                      <span className="font-bold text-accent w-12 text-right">{p.score}%</span>
+                    <div className="flex items-center gap-4 shrink-0">
+                      <span className="text-xs text-muted-foreground">{new Date(p.created_at).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}</span>
+                      <div className="flex items-center gap-1 min-w-[60px] justify-end">
+                         <span className={`font-black text-base ${p.score >= 80 ? 'text-emerald-600' : p.score >= 50 ? 'text-accent' : 'text-destructive'}`}>{p.score}%</span>
+                      </div>
                     </div>
                   </li>
                 ))}
