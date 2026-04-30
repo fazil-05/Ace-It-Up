@@ -145,7 +145,7 @@ const APT_TOPICS = [
 const QuestionInput = z.object({
   recentAvg: z.number().min(0).max(100).nullable().optional(),
   weakTopics: z.array(z.string()).max(10).optional(),
-  count: z.number().int().min(1).max(8).default(5),
+  count: z.number().int().min(1).max(20).default(5),
 });
 
 export type AptitudeQuestion = {
