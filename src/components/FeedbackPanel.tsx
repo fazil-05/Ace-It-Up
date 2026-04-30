@@ -1,13 +1,26 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import type { FeedbackResult } from "@/services/feedbackService";
-import { Sparkles, AlertCircle, CheckCircle2, Lightbulb, Cpu, Wrench, Wand2 } from "lucide-react";
+import { Sparkles, AlertCircle, CheckCircle2, Lightbulb, Cpu, Wrench, Wand2, Mic } from "lucide-react";
 
 export function FeedbackPanel({ feedback, loading, emptyHint }: { feedback: FeedbackResult | null; loading?: boolean; emptyHint: string }) {
+  const speak = (content: string) => {
+    window.speechSynthesis.cancel();
+    const utterance = new SpeechSynthesisUtterance(content);
+    utterance.rate = 0.9;
+    window.speechSynthesis.speak(utterance);
+  };
+
   return (
     <Card className="shadow-card bg-card/60">
-      <CardHeader>
+      <CardHeader className="flex flex-row items-center justify-between space-y-0">
         <CardTitle className="flex items-center gap-2"><Sparkles className="w-5 h-5 text-accent" /> AI Feedback</CardTitle>
+        {feedback && (
+          <Button variant="ghost" size="icon" onClick={() => speak(`Your score is ${feedback.score}. ${feedback.suggestions.join(". ")}`)} className="h-8 w-8 text-muted-foreground hover:text-accent">
+            <Mic className="w-4 h-4" />
+          </Button>
+        )}
       </CardHeader>
       <CardContent>
         {loading ? (
@@ -42,9 +55,14 @@ export function FeedbackPanel({ feedback, loading, emptyHint }: { feedback: Feed
 
             {feedback.improved_answer && (
               <div>
-                <p className="text-xs font-semibold text-muted-foreground uppercase mb-2 tracking-wider inline-flex items-center gap-1">
-                  <Wand2 className="w-3 h-3" /> Suggested improved answer
-                </p>
+                <div className="flex items-center justify-between mb-2">
+                  <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider inline-flex items-center gap-1">
+                    <Wand2 className="w-3 h-3" /> Suggested improved answer
+                  </p>
+                  <Button variant="ghost" size="icon" onClick={() => speak(feedback.improved_answer!)} className="h-6 w-6 text-muted-foreground hover:text-accent">
+                    <Mic className="w-3 h-3" />
+                  </Button>
+                </div>
                 <div className="text-sm leading-relaxed p-3 rounded-lg border border-border bg-secondary/40 whitespace-pre-wrap">
                   {feedback.improved_answer}
                 </div>

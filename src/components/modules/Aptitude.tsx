@@ -8,7 +8,7 @@ import { feedbackService, type AptitudeQuestion } from "@/services/feedbackServi
 import { progressService } from "@/services/progressService";
 import { useAuth } from "@/lib/auth-context";
 import { toast } from "sonner";
-import { Brain, Clock, RotateCcw, Trophy, Loader2, Sparkles, Cpu, Wrench } from "lucide-react";
+import { Brain, Clock, RotateCcw, Trophy, Loader2, Sparkles, Cpu, Wrench, Mic } from "lucide-react";
 
 const TIME_PER_Q = 60; // seconds per question (soft limit, not enforced)
 const QUESTION_COUNT = 5;
@@ -26,6 +26,13 @@ export function Aptitude() {
   const [done, setDone] = useState(false);
   const [saving, setSaving] = useState(false);
   const qStartRef = useRef<number>(Date.now());
+
+  const speak = (content: string) => {
+    window.speechSynthesis.cancel();
+    const utterance = new SpeechSynthesisUtterance(content);
+    utterance.rate = 0.9;
+    window.speechSynthesis.speak(utterance);
+  };
 
   // Load adaptive questions on mount.
   useEffect(() => { void loadQuestions(); /* eslint-disable-next-line react-hooks/exhaustive-deps */ }, []);
@@ -153,8 +160,11 @@ export function Aptitude() {
     const pct = questions.length ? Math.round((score / questions.length) * 100) : 0;
     return (
       <Card className="shadow-card">
-        <CardHeader>
+        <CardHeader className="flex flex-row items-center justify-between space-y-0">
           <CardTitle className="flex items-center gap-2"><Trophy className="w-5 h-5 text-accent" /> Test complete</CardTitle>
+          <Button variant="ghost" size="icon" onClick={() => speak(`Test complete. Your score is ${pct} percent. You got ${score} out of ${questions.length} correct.`)} className="h-8 w-8 text-muted-foreground hover:text-accent">
+            <Mic className="w-4 h-4" />
+          </Button>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="text-center py-6">
@@ -172,7 +182,12 @@ export function Aptitude() {
                     Your answer: <span className={correct ? "text-accent" : "text-destructive"}>{q.options[answers[i]] ?? "—"}</span>
                     {!correct && <> · Correct: <span className="text-accent">{q.options[q.answer_index]}</span></>}
                   </p>
-                  <p className="mt-1 text-xs">{q.explanation}</p>
+                  <div className="flex items-start justify-between gap-2 mt-1">
+                    <p className="text-xs">{q.explanation}</p>
+                    <Button variant="ghost" size="icon" onClick={() => speak(q.explanation)} className="h-6 w-6 shrink-0 text-muted-foreground hover:text-accent">
+                      <Mic className="w-3 h-3" />
+                    </Button>
+                  </div>
                 </div>
               );
             })}
@@ -190,7 +205,12 @@ export function Aptitude() {
   return (
     <Card className="shadow-card">
       <CardHeader className="flex flex-row items-center justify-between space-y-0">
-        <CardTitle className="flex items-center gap-2"><Brain className="w-5 h-5 text-accent" /> Aptitude</CardTitle>
+        <div className="flex items-center gap-2">
+          <CardTitle className="flex items-center gap-2"><Brain className="w-5 h-5 text-accent" /> Aptitude</CardTitle>
+          <Button variant="ghost" size="icon" onClick={() => speak(cur.question)} className="h-8 w-8 text-muted-foreground hover:text-accent" title="Listen to question">
+            <Mic className="w-4 h-4" />
+          </Button>
+        </div>
         <div className="flex items-center gap-2">
           <Badge variant="outline" className="capitalize">{difficulty}</Badge>
           <Badge variant="outline" className="text-[10px] gap-1">

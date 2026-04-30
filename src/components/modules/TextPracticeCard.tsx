@@ -50,6 +50,14 @@ export function TextPracticeCard({
     }
   }, [prompt]);
 
+  const speak = (content: string) => {
+    window.speechSynthesis.cancel();
+    const utterance = new SpeechSynthesisUtterance(content);
+    utterance.rate = 0.9;
+    utterance.pitch = 1;
+    window.speechSynthesis.speak(utterance);
+  };
+
   const toggleRecording = () => {
     if (isRecording) {
       recognitionRef.current?.stop();
@@ -59,47 +67,63 @@ export function TextPracticeCard({
 
     const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
     if (!SpeechRecognition) {
-      toast.error("Your browser doesn't support speech recognition. Try Chrome or Edge.");
+      toast.error("Your browser doesn't support speech recognition. Try Chrome or Safari.");
       return;
     }
 
-    const recognition = new SpeechRecognition();
-    recognition.continuous = true;
-    recognition.interimResults = true;
-    
-    let originalText = text;
-    if (originalText.trim() && !originalText.endsWith(" ")) {
-        originalText += " ";
-    }
-    
-    recognition.onresult = (event: any) => {
-      let finalTranscript = "";
-      let interimTranscript = "";
-
-      for (let i = event.resultIndex; i < event.results.length; ++i) {
-        if (event.results[i].isFinal) {
-          finalTranscript += event.results[i][0].transcript;
-        } else {
-          interimTranscript += event.results[i][0].transcript;
-        }
-      }
+    try {
+      const recognition = new SpeechRecognition();
+      recognition.continuous = true;
+      recognition.interimResults = true;
+      recognition.lang = "en-US";
       
-      originalText += finalTranscript;
-      setText(originalText + interimTranscript);
-    };
+      recognition.onstart = () => {
+        setIsRecording(true);
+        if (navigator.vibrate) navigator.vibrate(50);
+      };
 
-    recognition.onerror = (event: any) => {
-      console.error("Speech recognition error", event.error);
-      setIsRecording(false);
-    };
+      recognition.onresult = (event: any) => {
+        let interimTranscript = "";
+        let finalTranscript = "";
 
-    recognition.onend = () => {
-      setIsRecording(false);
-    };
+        for (let i = event.resultIndex; i < event.results.length; ++i) {
+          const transcript = event.results[i][0].transcript;
+          if (event.results[i].isFinal) {
+            finalTranscript += transcript;
+          } else {
+            interimTranscript += transcript;
+          }
+        }
 
-    recognition.start();
-    recognitionRef.current = recognition;
-    setIsRecording(true);
+        if (finalTranscript) {
+          setText(prev => {
+            const lastChar = prev.trim().slice(-1);
+            const needsSpace = prev.length > 0 && !prev.endsWith(" ") && !".?!".includes(lastChar);
+            return prev + (needsSpace ? " " : "") + finalTranscript;
+          });
+        }
+      };
+
+      recognition.onerror = (event: any) => {
+        console.error("Speech recognition error", event.error);
+        if (event.error === 'not-allowed') {
+          toast.error("Microphone access denied. Please enable it in settings.");
+        } else {
+          toast.error(`Recording error: ${event.error}`);
+        }
+        setIsRecording(false);
+      };
+
+      recognition.onend = () => {
+        setIsRecording(false);
+      };
+
+      recognition.start();
+      recognitionRef.current = recognition;
+    } catch (err) {
+      toast.error("Failed to start recording");
+      console.error(err);
+    }
   };
 
   async function submit() {
@@ -132,8 +156,11 @@ export function TextPracticeCard({
   return (
     <div className="grid gap-6 grid-cols-1 lg:grid-cols-2">
       <Card className="shadow-card">
-        <CardHeader>
+        <CardHeader className="flex flex-row items-center justify-between space-y-0">
           <CardTitle className="flex items-center gap-2 text-base md:text-lg">{icon} {title}</CardTitle>
+          <Button variant="ghost" size="icon" onClick={() => speak(prompt)} className="h-8 w-8 text-muted-foreground hover:text-accent" title="Listen to prompt">
+            <Mic className="w-4 h-4" />
+          </Button>
         </CardHeader>
         <CardContent className="space-y-3 md:space-y-4">
           {before}
