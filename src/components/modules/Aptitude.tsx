@@ -63,8 +63,8 @@ export function Aptitude() {
       }
       const res = await feedbackService.getAdaptiveQuestions({ recentAvg, weakTopics, count: QUESTION_COUNT });
       setQuestions(res.questions);
-      setDifficulty(res.difficulty);
-      setSource(res.source);
+      setDifficulty(res.difficulty as "easy" | "medium" | "hard");
+      setSource(res.source as "ai" | "fallback");
       qStartRef.current = Date.now();
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Could not load questions");
