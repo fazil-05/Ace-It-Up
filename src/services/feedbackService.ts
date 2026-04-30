@@ -16,11 +16,13 @@ export type FeedbackResult = {
 
 export const feedbackService = {
   async analyze(input: { module: "gd" | "communication" | "interview"; prompt: string; answer: string }): Promise<FeedbackResult> {
-    return await getFeedback({ data: input });
+    return await getFeedback(input);
   },
   async getAdaptiveQuestions(input: { recentAvg: number | null; weakTopics?: string[]; count?: number }) {
     return await generateAptitudeQuestions({
-      data: { recentAvg: input.recentAvg, weakTopics: input.weakTopics, count: input.count ?? 5 },
+      recentAvg: input.recentAvg,
+      weakTopics: input.weakTopics,
+      count: input.count ?? 5,
     });
   },
 };

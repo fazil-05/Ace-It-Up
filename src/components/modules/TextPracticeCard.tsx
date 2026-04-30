@@ -72,6 +72,18 @@ export function TextPracticeCard({
     }
 
     try {
+      // Proactively request mic permission to trigger the browser popup on mobile
+      if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+        await navigator.mediaDevices.getUserMedia({ audio: true })
+          .then(stream => stream.getTracks().forEach(track => track.stop()))
+          .catch(err => {
+            if (err.name === 'NotAllowedError') {
+              toast.error("Microphone access denied. Please click the 'Lock' icon in your browser address bar and enable Microphone.");
+              throw err;
+            }
+          });
+      }
+
       const recognition = new SpeechRecognition();
       recognition.continuous = true;
       recognition.interimResults = true;
@@ -107,9 +119,11 @@ export function TextPracticeCard({
       recognition.onerror = (event: any) => {
         console.error("Speech recognition error", event.error);
         if (event.error === 'not-allowed') {
-          toast.error("Microphone access denied. Please enable it in settings.");
+          toast.error("Permission denied. Look for the 'Lock' icon in your browser address bar to enable your microphone.");
+        } else if (event.error === 'network') {
+          toast.error("Network error. Please check your internet connection.");
         } else {
-          toast.error(`Recording error: ${event.error}`);
+          toast.error(`Mic error: ${event.error}`);
         }
         setIsRecording(false);
       };
@@ -121,8 +135,8 @@ export function TextPracticeCard({
       recognition.start();
       recognitionRef.current = recognition;
     } catch (err) {
-      toast.error("Failed to start recording");
-      console.error(err);
+      // Silent catch as toast is handled in then/catch above
+      console.warn("Recording start failed", err);
     }
   };
 
