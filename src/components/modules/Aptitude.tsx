@@ -15,7 +15,7 @@ const QUESTION_COUNT = 5;
 
 export function Aptitude() {
   const { user } = useAuth();
-  const [loading, setLoading] = useState(true);
+  const [mode, setMode] = useState<"config" | "loading" | "test" | "done">("config");
   const [questions, setQuestions] = useState<AptitudeQuestion[]>([]);
   const [difficulty, setDifficulty] = useState<"easy" | "medium" | "hard">("medium");
   const [source, setSource] = useState<"ai" | "fallback">("fallback");
@@ -23,8 +23,8 @@ export function Aptitude() {
   const [answers, setAnswers] = useState<number[]>([]);
   const [perQTime, setPerQTime] = useState<number[]>([]);
   const [time, setTime] = useState(TIME_PER_Q);
-  const [done, setDone] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [qCount, setQCount] = useState(5);
   const qStartRef = useRef<number>(Date.now());
 
   const speak = (content: string) => {
@@ -34,13 +34,9 @@ export function Aptitude() {
     window.speechSynthesis.speak(utterance);
   };
 
-  // Load adaptive questions on mount.
-  useEffect(() => { void loadQuestions(); /* eslint-disable-next-line react-hooks/exhaustive-deps */ }, []);
-
-  async function loadQuestions() {
-    setLoading(true); setDone(false); setIdx(0); setAnswers([]); setPerQTime([]); setTime(TIME_PER_Q);
+  async function loadQuestions(count: number = qCount) {
+    setMode("loading"); setIdx(0); setAnswers([]); setPerQTime([]); setTime(TIME_PER_Q);
     try {
-      // Pull recent aptitude attempts to compute adaptive difficulty + weak topics.
       let recentAvg: number | null = null;
       let weakTopics: string[] = [];
       if (user) {
@@ -61,25 +57,25 @@ export function Aptitude() {
             .map((x) => x.t);
         }
       }
-      const res = await feedbackService.getAdaptiveQuestions({ recentAvg, weakTopics, count: QUESTION_COUNT });
+      const res = await feedbackService.getAdaptiveQuestions({ recentAvg, weakTopics, count });
       setQuestions(res.questions);
       setDifficulty(res.difficulty as "easy" | "medium" | "hard");
       setSource(res.source as "ai" | "fallback");
       qStartRef.current = Date.now();
+      setMode("test");
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Could not load questions");
-    } finally {
-      setLoading(false);
+      setMode("config");
     }
   }
 
-  // Soft countdown — does not auto-advance, just nudges the user.
+  // Soft countdown
   useEffect(() => {
-    if (done || loading) return;
+    if (mode !== "test") return;
     if (time <= 0) return;
     const t = setTimeout(() => setTime((s) => s - 1), 1000);
     return () => clearTimeout(t);
-  }, [time, done, loading]);
+  }, [time, mode]);
 
   const score = useMemo(
     () => answers.reduce((acc, a, i) => acc + (a === questions[i]?.answer_index ? 1 : 0), 0),
@@ -101,18 +97,16 @@ export function Aptitude() {
   }
 
   async function finish(final: number[], times: number[]) {
-    if (done || !user) { setDone(true); return; }
-    setDone(true);
+    setMode("done");
     setSaving(true);
     try {
       const totalMs = times.reduce((a, b) => a + b, 0);
-      // Per-question attempts (so we get per-topic accuracy in analytics).
       await Promise.all(final.map((ans, i) => {
         const q = questions[i];
         if (!q) return Promise.resolve();
         const correct = ans === q.answer_index;
         return moduleService.saveAttempt({
-          userId: user.id,
+          userId: user?.id || "",
           module: "aptitude",
           score: correct ? 100 : 0,
           detail: `${q.topic} · ${q.difficulty}`,
@@ -124,18 +118,18 @@ export function Aptitude() {
           timeSpentMs: times[i] ?? null,
         });
       }));
-      // Aggregate session record (avg %) so dashboard list still shows one entry per session too.
       const pct = Math.round((final.reduce((a, ans, i) => a + (ans === questions[i]?.answer_index ? 1 : 0), 0) / questions.length) * 100);
-      await moduleService.saveAttempt({
-        userId: user.id,
-        module: "aptitude",
-        score: pct,
-        detail: `Session · ${final.length} Qs · ${difficulty}`,
-        difficulty,
-        topic: "session-summary",
-        timeSpentMs: totalMs,
-      });
-      // Refresh cached progress (no-op if not used).
+      if (user) {
+        await moduleService.saveAttempt({
+          userId: user.id,
+          module: "aptitude",
+          score: pct,
+          detail: `Session · ${final.length} Qs · ${difficulty}`,
+          difficulty,
+          topic: "session-summary",
+          timeSpentMs: totalMs,
+        });
+      }
       void progressService.listAttempts(50);
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Could not save attempt");
@@ -144,7 +138,39 @@ export function Aptitude() {
     }
   }
 
-  if (loading) {
+  if (mode === "config") {
+    return (
+      <Card className="shadow-card">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2"><Brain className="w-5 h-5 text-accent" /> Configure Aptitude Test</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-6 py-8">
+          <div className="text-center space-y-2">
+            <h3 className="text-xl font-bold">How many questions?</h3>
+            <p className="text-sm text-muted-foreground">Select the number of questions for this session.</p>
+          </div>
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+            {[1, 5, 10, 15, 20].map((n) => (
+              <button
+                key={n}
+                onClick={() => setQCount(n)}
+                className={`py-4 rounded-xl border-2 transition-all font-bold ${
+                  qCount === n ? "border-accent bg-accent/10 text-accent" : "border-border hover:border-accent/50"
+                }`}
+              >
+                {n} {n === 1 ? 'Question' : 'Questions'}
+              </button>
+            ))}
+          </div>
+          <Button onClick={() => loadQuestions(qCount)} className="w-full bg-gradient-primary border-0 py-6 text-lg">
+            Start Test <Sparkles className="w-5 h-5 ml-2" />
+          </Button>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  if (mode === "loading") {
     return (
       <Card className="shadow-card">
         <CardHeader><CardTitle className="flex items-center gap-2"><Brain className="w-5 h-5 text-accent" /> Loading adaptive test…</CardTitle></CardHeader>
@@ -156,7 +182,7 @@ export function Aptitude() {
     );
   }
 
-  if (done) {
+  if (mode === "done") {
     const pct = questions.length ? Math.round((score / questions.length) * 100) : 0;
     return (
       <Card className="shadow-card">
@@ -172,29 +198,38 @@ export function Aptitude() {
             <p className="text-muted-foreground mt-2">{score} / {questions.length} correct · <span className="capitalize">{difficulty}</span></p>
             <p className="text-xs text-muted-foreground mt-1">{saving ? "Saving…" : "Saved to your progress ✓"}</p>
           </div>
-          <div className="space-y-3 max-h-72 overflow-y-auto">
+          <div className="space-y-3 max-h-72 overflow-y-auto pr-2">
             {questions.map((q, i) => {
               const correct = answers[i] === q.answer_index;
               return (
-                <div key={q.id} className={`p-3 rounded-lg border text-sm ${correct ? "border-accent/40 bg-accent/5" : "border-destructive/40 bg-destructive/5"}`}>
-                  <p className="font-medium">{i + 1}. {q.question}</p>
-                  <p className="mt-1 text-xs text-muted-foreground">
-                    Your answer: <span className={correct ? "text-accent" : "text-destructive"}>{q.options[answers[i]] ?? "—"}</span>
-                    {!correct && <> · Correct: <span className="text-accent">{q.options[q.answer_index]}</span></>}
-                  </p>
-                  <div className="flex items-start justify-between gap-2 mt-1">
-                    <p className="text-xs">{q.explanation}</p>
-                    <Button variant="ghost" size="icon" onClick={() => speak(q.explanation)} className="h-6 w-6 shrink-0 text-muted-foreground hover:text-accent">
-                      <Mic className="w-3 h-3" />
+                <div key={q.id} className={`p-4 rounded-xl border text-sm transition-all ${correct ? "border-emerald-200 bg-emerald-50/50" : "border-destructive/20 bg-destructive/5"}`}>
+                  <div className="flex items-start justify-between gap-3">
+                    <p className="font-bold text-slate-800">{i + 1}. {q.question}</p>
+                    <Button variant="ghost" size="icon" onClick={() => speak(q.question)} className="h-6 w-6 shrink-0">
+                      <Mic className="w-3.5 h-3.5" />
                     </Button>
+                  </div>
+                  <div className="mt-2 space-y-1">
+                    <p className={`font-medium ${correct ? "text-emerald-600" : "text-destructive"}`}>
+                      Your: {q.options[answers[i]] || "No answer"}
+                    </p>
+                    {!correct && <p className="text-emerald-600 font-medium">Correct: {q.options[q.answer_index]}</p>}
+                  </div>
+                  <div className="mt-3 p-3 rounded-lg bg-white/60 text-slate-600 text-xs border border-slate-100 italic">
+                    {q.explanation}
                   </div>
                 </div>
               );
             })}
           </div>
-          <Button onClick={loadQuestions} className="w-full bg-gradient-primary border-0">
-            <RotateCcw className="w-4 h-4 mr-2" /> Next adaptive set
-          </Button>
+          <div className="grid grid-cols-2 gap-3 mt-4">
+            <Button variant="outline" onClick={() => setMode("config")} className="w-full">
+              <RotateCcw className="w-4 h-4 mr-2" /> Change Settings
+            </Button>
+            <Button onClick={() => loadQuestions()} className="w-full bg-gradient-primary border-0">
+              <RotateCcw className="w-4 h-4 mr-2" /> Retake Test
+            </Button>
+          </div>
         </CardContent>
       </Card>
     );
@@ -222,16 +257,23 @@ export function Aptitude() {
         </div>
       </CardHeader>
       <CardContent className="space-y-5">
-        <Progress value={(idx / questions.length) * 100} />
+        <Progress value={(idx / questions.length) * 100} className="h-2" />
         <div className="flex items-center justify-between text-xs text-muted-foreground">
           <span>Question {idx + 1} of {questions.length}</span>
           <span className="inline-flex items-center gap-1"><Sparkles className="w-3 h-3" /> Topic: {cur.topic.replace(/-/g, " ")}</span>
         </div>
-        <h3 className="text-lg font-semibold leading-snug">{cur.question}</h3>
-        <div className="grid gap-2">
+        <h3 className="text-xl font-bold leading-tight text-slate-900">{cur.question}</h3>
+        <div className="grid gap-3">
           {cur.options.map((o, i) => (
-            <button key={i} onClick={() => pick(i)} className="text-left px-4 py-3 rounded-lg border border-border bg-secondary/40 hover:bg-secondary hover:border-accent transition-all">
-              <span className="font-mono text-accent mr-2">{String.fromCharCode(65 + i)}.</span> {o}
+            <button 
+              key={i} 
+              onClick={() => pick(i)} 
+              className="group text-left px-5 py-4 rounded-xl border-2 border-border bg-white hover:border-accent hover:bg-accent/5 transition-all duration-300 flex items-center gap-4"
+            >
+              <div className="w-8 h-8 rounded-full border-2 border-border group-hover:border-accent group-hover:bg-accent text-slate-500 group-hover:text-white flex items-center justify-center font-bold text-sm shrink-0 transition-colors">
+                {String.fromCharCode(65 + i)}
+              </div>
+              <span className="font-medium text-slate-700 group-hover:text-slate-900">{o}</span>
             </button>
           ))}
         </div>
