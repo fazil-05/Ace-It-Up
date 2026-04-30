@@ -132,7 +132,8 @@ export default function ShaderShowcase() {
           </div>
         </header>
 
-        <main className="flex-1 flex flex-col justify-center px-4 md:px-12 pt-8 md:pt-16 pb-24 w-full max-w-7xl mx-auto">
+        {/* Full-screen hero section */}
+        <section className="flex flex-col justify-center px-4 md:px-12 pt-4 pb-12 w-full max-w-7xl mx-auto min-h-[calc(100vh-64px)]">
           <div className="text-left max-w-2xl">
             <motion.h1
               className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-bold text-slate-900 mb-4 md:mb-6 leading-none tracking-tight"
@@ -193,9 +194,26 @@ export default function ShaderShowcase() {
             </motion.div>
           </div>
 
+          {/* Scroll indicator */}
           <motion.div
-            id="features"
-            className="mt-16 md:mt-28 grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-6 text-left w-full"
+            className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 text-slate-400"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 1, delay: 1.6 }}
+          >
+            <span className="text-xs font-medium tracking-widest uppercase">Scroll</span>
+            <motion.div
+              className="w-px h-8 bg-slate-300"
+              animate={{ scaleY: [0.4, 1, 0.4] }}
+              transition={{ duration: 1.5, repeat: Number.POSITIVE_INFINITY, ease: "easeInOut" }}
+            />
+          </motion.div>
+        </section>
+
+        {/* Features section — visible on scroll */}
+        <section id="features" className="px-4 md:px-12 pb-24 w-full max-w-7xl mx-auto">
+          <motion.div
+            className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-6 text-left w-full"
             initial={{ opacity: 0, y: 40 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 1.2 }}
@@ -224,8 +242,7 @@ export default function ShaderShowcase() {
           >
             <Trophy className="w-5 h-5 text-indigo-500" /> Built for students serious about placements.
           </motion.div>
-
-        </main>
+        </section>
       </div>
 
       <div className="fixed bottom-8 right-8 z-30 hidden lg:block">
