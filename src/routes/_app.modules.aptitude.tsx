@@ -13,9 +13,9 @@ export const Route = createFileRoute("/_app/modules/aptitude")({
 
 function ModuleHeader({ title, subtitle }: { title: string; subtitle: string }) {
   return (
-    <div>
-      <h1 className="text-2xl md:text-3xl font-extrabold tracking-tight">{title}</h1>
-      <p className="text-muted-foreground mt-1">{subtitle}</p>
+    <div className="px-1 md:px-0">
+      <h1 className="text-xl md:text-3xl font-extrabold tracking-tight">{title}</h1>
+      <p className="text-xs md:text-base text-muted-foreground mt-0.5 md:mt-1">{subtitle}</p>
     </div>
   );
 }

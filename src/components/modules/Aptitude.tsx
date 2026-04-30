@@ -250,26 +250,26 @@ export function Aptitude() {
   const cur = questions[idx];
   if (!cur) return null;
   return (
-    <Card className="shadow-card">
-      <CardHeader className="flex flex-row items-center justify-between space-y-0">
+    <Card className="shadow-card border-0 sm:border">
+      <CardHeader className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-0 pb-4">
         <div className="flex items-center gap-2">
-          <CardTitle className="flex items-center gap-2"><Brain className="w-5 h-5 text-accent" /> Aptitude</CardTitle>
+          <CardTitle className="flex items-center gap-2 text-lg sm:text-xl"><Brain className="w-5 h-5 text-accent" /> Aptitude</CardTitle>
           <Button variant="ghost" size="icon" onClick={() => speak(cur.question)} className="h-8 w-8 text-muted-foreground hover:text-accent" title="Listen to question">
             <Mic className="w-4 h-4" />
           </Button>
         </div>
-        <div className="flex items-center gap-2">
-          <Badge variant="outline" className="capitalize">{difficulty}</Badge>
-          <Badge variant="outline" className="text-[10px] gap-1">
+        <div className="flex flex-wrap items-center gap-2">
+          <Badge variant="outline" className="capitalize text-[10px] sm:text-xs px-2 py-0">{difficulty}</Badge>
+          <Badge variant="outline" className="text-[10px] gap-1 px-2 py-0">
             {source === "ai" ? <><Cpu className="w-3 h-3" /> AI</> : <><Wrench className="w-3 h-3" /> Bank</>}
           </Badge>
-          <div className="flex items-center gap-1.5 text-sm font-mono px-3 py-1 rounded-full bg-secondary">
+          <div className="flex items-center gap-1.5 text-xs sm:text-sm font-mono px-3 py-1 rounded-full bg-secondary">
             <Clock className="w-4 h-4" /> {String(Math.floor(time / 60)).padStart(2, "0")}:{String(time % 60).padStart(2, "0")}
           </div>
         </div>
       </CardHeader>
-      <CardContent className="space-y-5">
-        <Progress value={(idx / questions.length) * 100} className="h-2" />
+      <CardContent className="space-y-4 px-4 sm:px-6">
+        <Progress value={(idx / questions.length) * 100} className="h-1.5" />
         <div className="flex items-center justify-between text-xs text-muted-foreground">
           <span>Question {idx + 1} of {questions.length}</span>
           <span className="inline-flex items-center gap-1"><Sparkles className="w-3 h-3" /> Topic: {cur.topic.replace(/-/g, " ")}</span>
