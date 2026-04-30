@@ -34,7 +34,7 @@ function AppLayout() {
   }
 
   return (
-    <div className="h-screen flex flex-col bg-background text-foreground transition-colors duration-300 relative overflow-hidden">
+    <div className="min-h-screen flex flex-col bg-background text-foreground transition-colors duration-300 relative">
       <div className="fixed inset-0 z-0 pointer-events-none">
         <MeshGradient
           className="absolute inset-0 w-full h-full opacity-60"
@@ -43,9 +43,9 @@ function AppLayout() {
         />
       </div>
       <Navbar />
-      <div className="relative z-10 flex flex-1 w-full overflow-hidden">
+      <div className="relative z-10 flex flex-1 w-full">
         <Sidebar />
-        <main className="flex-1 overflow-y-auto p-3 md:p-8 pb-20 md:pb-8 relative">
+        <main className="flex-1 p-3 md:p-8 pb-32 md:pb-8 relative">
           <AnimatePresence mode="wait">
             <motion.div
               key={router.location.pathname}
@@ -53,7 +53,7 @@ function AppLayout() {
               animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
               exit={{ opacity: 0, y: -10, filter: "blur(4px)" }}
               transition={{ duration: 0.3, ease: "easeOut" }}
-              className="h-full"
+              className="min-h-full"
             >
               <Outlet />
             </motion.div>
