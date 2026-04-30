@@ -78,13 +78,13 @@ export function TextPracticeCard({
           .then(stream => stream.getTracks().forEach(track => track.stop()))
           .catch(err => {
             if (err.name === 'NotAllowedError') {
-              toast.error("Microphone access denied. Please click the 'Lock' icon in your browser address bar and enable Microphone.");
+              toast.error("Microphone access denied. Click the 'Settings/Lock' icon in your browser address bar (top left) and enable Microphone.");
               throw err;
             }
           });
       }
 
-      const recognition = new SpeechRecognition();
+      const recognition = new (window as any).webkitSpeechRecognition();
       recognition.continuous = true;
       recognition.interimResults = true;
       recognition.lang = "en-US";
@@ -95,22 +95,13 @@ export function TextPracticeCard({
       };
 
       recognition.onresult = (event: any) => {
-        let interimTranscript = "";
         let finalTranscript = "";
-
         for (let i = event.resultIndex; i < event.results.length; ++i) {
-          const transcript = event.results[i][0].transcript;
-          if (event.results[i].isFinal) {
-            finalTranscript += transcript;
-          } else {
-            interimTranscript += transcript;
-          }
+          if (event.results[i].isFinal) finalTranscript += event.results[i][0].transcript;
         }
-
         if (finalTranscript) {
           setText(prev => {
-            const lastChar = prev.trim().slice(-1);
-            const needsSpace = prev.length > 0 && !prev.endsWith(" ") && !".?!".includes(lastChar);
+            const needsSpace = prev.length > 0 && !prev.endsWith(" ");
             return prev + (needsSpace ? " " : "") + finalTranscript;
           });
         }
@@ -119,7 +110,7 @@ export function TextPracticeCard({
       recognition.onerror = (event: any) => {
         console.error("Speech recognition error", event.error);
         if (event.error === 'not-allowed') {
-          toast.error("Permission denied. Look for the 'Lock' icon in your browser address bar to enable your microphone.");
+          toast.error("Permission denied. Look for the 'Settings' icon in your address bar (top left) to enable your microphone.");
         } else if (event.error === 'network') {
           toast.error("Network error. Please check your internet connection.");
         } else {
@@ -135,7 +126,6 @@ export function TextPracticeCard({
       recognition.start();
       recognitionRef.current = recognition;
     } catch (err) {
-      // Silent catch as toast is handled in then/catch above
       console.warn("Recording start failed", err);
     }
   };
@@ -154,10 +144,15 @@ export function TextPracticeCard({
     setBusy(true);
     setFb(null);
     try {
-      console.log("Analyzing feedback for:", { module, prompt, textLength: text.length });
+      // Robustly ensure module is a valid string for the AI
+      const activeModule = String(module || "communication").toLowerCase() as any;
+      const activePrompt = String(prompt || "Practice Session");
+
+      console.log("Submitting to AI:", { module: activeModule, prompt: activePrompt });
+      
       const result = await feedbackService.analyze({ 
-        module: module as "gd" | "communication" | "interview", 
-        prompt: prompt || "Practice Session", 
+        module: activeModule, 
+        prompt: activePrompt, 
         answer: text 
       });
       setFb(result);
