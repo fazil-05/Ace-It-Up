@@ -34,13 +34,15 @@ export function Aptitude() {
     window.speechSynthesis.speak(utterance);
   };
 
+  const seenIdsRef = useRef<Set<string>>(new Set());
+
   async function loadQuestions(count: number = qCount) {
     setMode("loading"); 
     setIdx(0); 
     setAnswers([]); 
     setPerQTime([]); 
     setTime(TIME_PER_Q);
-    setQuestions([]); // Clear current questions immediately
+    setQuestions([]);
 
     try {
       let recentAvg: number | null = null;
@@ -64,13 +66,31 @@ export function Aptitude() {
         }
       }
       
-      // Add a timestamp to the request to prevent caching if it were an API call
-      const res = await feedbackService.getAdaptiveQuestions({ recentAvg, weakTopics, count });
+      // Fetch a larger pool to allow filtering
+      const res = await feedbackService.getAdaptiveQuestions({ 
+        recentAvg, 
+        weakTopics, 
+        count: Math.max(count * 3, 20) 
+      });
       
-      // Robust shuffle for the questions received
-      const shuffled = [...res.questions].sort(() => Math.random() - 0.5);
+      // Filter out questions we've already seen
+      let available = res.questions.filter(q => !seenIdsRef.current.has(q.id));
       
-      setQuestions(shuffled);
+      // If we've run out of new questions, reset the 'seen' memory
+      if (available.length < count) {
+        seenIdsRef.current.clear();
+        available = res.questions;
+      }
+      
+      // Shuffle and pick the requested amount
+      const selected = available
+        .sort(() => Math.random() - 0.5)
+        .slice(0, count);
+      
+      // Mark these as 'seen'
+      selected.forEach(q => seenIdsRef.current.add(q.id));
+      
+      setQuestions(selected);
       setDifficulty(res.difficulty as "easy" | "medium" | "hard");
       setSource(res.source as "ai" | "fallback");
       qStartRef.current = Date.now();

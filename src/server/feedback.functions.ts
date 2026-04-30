@@ -229,29 +229,37 @@ export const generateAptitudeQuestions = async (input: z.infer<typeof QuestionIn
 
 function fallbackBank(difficulty: "easy" | "medium" | "hard", count: number): AptitudeQuestion[] {
   const easy: AptitudeQuestion[] = [
-    { id: "f-e1", topic: "percentages", difficulty: "easy", question: "20% of 250 is?", options: ["25", "40", "50", "75"], answer_index: 2, explanation: "20% of 250 = (20/100) * 250 = 50." },
-    { id: "f-e2", topic: "averages", difficulty: "easy", question: "What is the average of 10, 20, 30, 40, and 50?", options: ["25", "30", "35", "40"], answer_index: 1, explanation: "Sum = 150. Count = 5. Average = 150/5 = 30." },
-    { id: "f-e3", topic: "profit-loss", difficulty: "easy", question: "A pen is bought for $10 and sold for $12. What is the profit percentage?", options: ["10%", "15%", "20%", "25%"], answer_index: 2, explanation: "Profit = $2. Profit % = (2/10) * 100 = 20%." },
-    { id: "f-e4", topic: "ratio-proportion", difficulty: "easy", question: "If A:B = 2:3 and B:C = 4:5, what is A:B:C?", options: ["8:12:15", "2:4:5", "6:8:10", "8:10:15"], answer_index: 0, explanation: "Multiply A:B by 4 and B:C by 3 to equate B. (2*4):(3*4) and (4*3):(5*3) = 8:12 and 12:15." },
-    { id: "f-e5", topic: "number-series", difficulty: "easy", question: "Complete the series: 2, 4, 8, 16, ?", options: ["20", "24", "32", "64"], answer_index: 2, explanation: "Each number is multiplied by 2. 16 * 2 = 32." },
+    { id: "e1", topic: "percentages", difficulty: "easy", question: "20% of 250 is?", options: ["25", "40", "50", "75"], answer_index: 2, explanation: "20% of 250 = (20/100) * 250 = 50." },
+    { id: "e2", topic: "averages", difficulty: "easy", question: "Average of 10, 20, 30, 40, 50?", options: ["25", "30", "35", "40"], answer_index: 1, explanation: "Sum = 150. Count = 5. 150/5 = 30." },
+    { id: "e3", topic: "profit-loss", difficulty: "easy", question: "Buy at $10, sell at $12. Profit %?", options: ["10%", "15%", "20%", "25%"], answer_index: 2, explanation: "Profit = $2. (2/10) * 100 = 20%." },
+    { id: "e4", topic: "ratio-proportion", difficulty: "easy", question: "If A:B = 2:3 and B:C = 4:5, what is A:B:C?", options: ["8:12:15", "2:4:5", "6:8:10", "8:10:15"], answer_index: 0, explanation: "Multiply to equate B: 8:12 and 12:15." },
+    { id: "e5", topic: "number-series", difficulty: "easy", question: "Series: 2, 4, 8, 16, ?", options: ["20", "24", "32", "64"], answer_index: 2, explanation: "Multiply by 2. 16 * 2 = 32." },
+    { id: "e6", topic: "percentages", difficulty: "easy", question: "Convert 0.05 into percentage.", options: ["0.5%", "5%", "50%", "0.05%"], answer_index: 1, explanation: "0.05 * 100 = 5%." },
+    { id: "e7", topic: "averages", difficulty: "easy", question: "Average of first five prime numbers?", options: ["5.2", "5.6", "6.2", "6.6"], answer_index: 1, explanation: "Primes: 2,3,5,7,11. Sum=28. 28/5 = 5.6." },
+    { id: "e8", topic: "profit-loss", difficulty: "easy", question: "A man buys a cycle for $1400 and sells it at a loss of 15%. Selling price?", options: ["$1090", "$1160", "$1190", "$1202"], answer_index: 2, explanation: "SP = 85% of 1400 = 1190." },
   ];
   const medium: AptitudeQuestion[] = [
-    { id: "f-m1", topic: "speed-time-distance", difficulty: "medium", question: "A train 150m long passes a pole in 15 seconds. What is its speed in km/hr?", options: ["36", "45", "54", "60"], answer_index: 0, explanation: "Speed = 150/15 = 10 m/s. 10 * (18/5) = 36 km/hr." },
-    { id: "f-m2", topic: "probability", difficulty: "medium", question: "Two coins are tossed. What is the probability of getting at least one head?", options: ["1/4", "1/2", "3/4", "1"], answer_index: 2, explanation: "Total outcomes: HH, HT, TH, TT (4). Favorable: HH, HT, TH (3). Probability = 3/4." },
-    { id: "f-m3", topic: "time-work", difficulty: "medium", question: "A can do a work in 10 days and B in 15 days. How long will they take together?", options: ["5 days", "6 days", "7 days", "8 days"], answer_index: 1, explanation: "1/10 + 1/15 = (3+2)/30 = 5/30 = 1/6. So, 6 days." },
-    { id: "f-m4", topic: "simple-interest", difficulty: "medium", question: "Find SI on $5000 at 10% per annum for 2 years.", options: ["$500", "$1000", "$1200", "$1500"], answer_index: 1, explanation: "SI = (P*R*T)/100 = (5000*10*2)/100 = 1000." },
-    { id: "f-m5", topic: "lcm-hcf", difficulty: "medium", question: "The HCF of two numbers is 11 and their LCM is 7700. If one number is 275, find the other.", options: ["279", "283", "308", "318"], answer_index: 2, explanation: "Product of numbers = HCF * LCM. Other = (11 * 7700) / 275 = 308." },
+    { id: "m1", topic: "speed-time-distance", difficulty: "medium", question: "A train 150m long passes a pole in 15s. Speed in km/hr?", options: ["36", "45", "54", "60"], answer_index: 0, explanation: "10 m/s * (18/5) = 36 km/hr." },
+    { id: "m2", topic: "probability", difficulty: "medium", question: "Two coins tossed. Prob of at least one head?", options: ["1/4", "1/2", "3/4", "1"], answer_index: 2, explanation: "HH, HT, TH, TT. Prob = 3/4." },
+    { id: "m3", topic: "time-work", difficulty: "medium", question: "A does work in 10d, B in 15d. Together?", options: ["5 days", "6 days", "7 days", "8 days"], answer_index: 1, explanation: "1/10 + 1/15 = 5/30 = 1/6. So 6 days." },
+    { id: "m4", topic: "simple-interest", difficulty: "medium", question: "SI on $5000 at 10% for 2 years?", options: ["$500", "$1000", "$1200", "$1500"], answer_index: 1, explanation: "(5000*10*2)/100 = 1000." },
+    { id: "m5", topic: "lcm-hcf", difficulty: "medium", question: "HCF of 11, LCM 7700. One num 275, other?", options: ["279", "283", "308", "318"], answer_index: 2, explanation: "(11 * 7700) / 275 = 308." },
+    { id: "m6", topic: "speed-time-distance", difficulty: "medium", question: "A car travels 300km in 5 hours. How much in 8 hours at same speed?", options: ["420km", "450km", "480km", "500km"], answer_index: 2, explanation: "Speed = 60km/h. 60 * 8 = 480km." },
+    { id: "m7", topic: "time-work", difficulty: "medium", question: "12 men can finish a project in 20 days. 15 men?", options: ["14 days", "16 days", "18 days", "20 days"], answer_index: 1, explanation: "Total work = 12 * 20 = 240 man-days. 240 / 15 = 16 days." },
   ];
   const hard: AptitudeQuestion[] = [
-    { id: "f-h1", topic: "permutations", difficulty: "hard", question: "How many ways can the letters of 'APPLE' be arranged?", options: ["60", "120", "240", "480"], answer_index: 0, explanation: "Total 5 letters, 'P' repeats twice. 5! / 2! = 120 / 2 = 60." },
-    { id: "f-h2", topic: "clocks-calendars", difficulty: "hard", question: "What was the day on 15th August 1947?", options: ["Thursday", "Friday", "Saturday", "Sunday"], answer_index: 1, explanation: "Calculation using odd days leads to Friday." },
-    { id: "f-h3", topic: "data-interpretation", difficulty: "hard", question: "In a class of 100, 60 like Math, 50 like Science, 30 like both. How many like neither?", options: ["10", "20", "30", "40"], answer_index: 1, explanation: "n(M U S) = n(M) + n(S) - n(M ∩ S) = 60 + 50 - 30 = 80. Neither = 100 - 80 = 20." },
+    { id: "h1", topic: "permutations", difficulty: "hard", question: "Ways to arrange letters of 'APPLE'?", options: ["60", "120", "240", "480"], answer_index: 0, explanation: "5! / 2! = 60." },
+    { id: "h2", topic: "clocks-calendars", difficulty: "hard", question: "Day on 15th August 1947?", options: ["Thursday", "Friday", "Saturday", "Sunday"], answer_index: 1, explanation: "Calculation leads to Friday." },
+    { id: "h3", topic: "data-interpretation", difficulty: "hard", question: "In class of 100, 60 like Math, 50 Science, 30 both. Neither?", options: ["10", "20", "30", "40"], answer_index: 1, explanation: "100 - (60+50-30) = 20." },
+    { id: "h4", topic: "probability", difficulty: "hard", question: "From deck of cards, prob of picking a Red Queen?", options: ["1/13", "1/26", "1/52", "2/13"], answer_index: 1, explanation: "2 Red Queens / 52 cards = 1/26." },
+    { id: "h5", topic: "compound-interest", difficulty: "hard", question: "CI on $1000 at 10% for 2 years compounded annually?", options: ["$200", "$210", "$220", "$240"], answer_index: 1, explanation: "1000 * (1.1)^2 = 1210. CI = 210." },
   ];
   
-  let pool = easy;
-  if (difficulty === "medium") pool = [...easy, ...medium];
-  if (difficulty === "hard") pool = [...medium, ...hard];
+  let pool = [...easy, ...medium, ...hard];
+  if (difficulty === "easy") pool = easy;
+  else if (difficulty === "medium") pool = [...easy, ...medium];
   
-  // Shuffle and slice
-  return pool.sort(() => Math.random() - 0.5).slice(0, count);
+  // High-quality shuffle
+  const shuffled = pool.sort(() => Math.random() - 0.5);
+  return shuffled.slice(0, count);
 }
