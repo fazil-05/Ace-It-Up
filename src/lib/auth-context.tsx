@@ -17,6 +17,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     console.log("Auth: Initializing...");
+
+    // Handle OAuth redirect — Supabase puts tokens in the URL hash
+    const hash = window.location.hash;
+    if (hash && hash.includes("access_token")) {
+      supabase.auth.getSession().then(({ data }) => {
+        if (data.session) {
+          setSession(data.session);
+          // Clean up the URL hash and redirect to dashboard
+          window.history.replaceState({}, document.title, window.location.pathname);
+        }
+        setLoading(false);
+      });
+    }
+
     const { data: sub } = supabase.auth.onAuthStateChange((event, s) => {
       console.log("Auth: Event fired:", event, "User:", s?.user?.email);
       setSession(s);
