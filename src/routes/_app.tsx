@@ -40,7 +40,6 @@ function AppLayout() {
           className="absolute inset-0 w-full h-full opacity-60"
           colors={["#ffffff", "#e0f2fe", "#bae6fd", "#7dd3fc", "#38bdf8"]}
           speed={0.1}
-          backgroundColor="#ffffff"
         />
       </div>
       <Navbar />
