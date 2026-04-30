@@ -50,13 +50,12 @@ function Register() {
     }
   }
 
-  async function oauth(provider: "google" | "apple") {
+  async function oauth() {
     setBusy(true);
     try {
-      if (provider === "google") await authService.signInWithGoogle();
-      else await authService.signInWithApple();
+      await authService.signInWithGoogle();
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : `${provider} sign-in failed`);
+      toast.error(err instanceof Error ? err.message : "Google sign-in failed");
       setBusy(false);
     }
   }

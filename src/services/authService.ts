@@ -33,15 +33,6 @@ export const authService = {
     if (error) throw error;
   },
 
-  async signInWithApple() {
-    const { error } = await supabase.auth.signInWithOAuth({
-      provider: "apple",
-      options: {
-        redirectTo: window.location.origin,
-      },
-    });
-    if (error) throw error;
-  },
 
   async signOut() {
     const { error } = await supabase.auth.signOut();
