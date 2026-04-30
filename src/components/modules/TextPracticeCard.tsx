@@ -73,18 +73,28 @@ export function TextPracticeCard({
 
     try {
       // Proactively request mic permission to trigger the browser popup on mobile
-      if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-        await navigator.mediaDevices.getUserMedia({ audio: true })
-          .then(stream => stream.getTracks().forEach(track => track.stop()))
-          .catch(err => {
-            if (err.name === 'NotAllowedError') {
-              toast.error("Microphone access denied. Click the 'Settings/Lock' icon in your browser address bar (top left) and enable Microphone.");
-              throw err;
-            }
-          });
+      // 1. First, check if we even have media device support
+      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        toast.error("Your browser doesn't support microphone access.");
+        return;
       }
 
-      const recognition = new (window as any).webkitSpeechRecognition();
+      // 2. Proactively trigger the native browser 'Allow' popup
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        // If we get here, user clicked 'Allow'. We stop the dummy stream immediately.
+        stream.getTracks().forEach(track => track.stop());
+      } catch (err: any) {
+        if (err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError') {
+          toast.error("Microphone is blocked. Tap the 'Settings' icon in your browser's address bar to 'Allow' access.");
+          return;
+        }
+        throw err;
+      }
+
+      // 3. Start the Speech Recognition once we have permission
+      const SpeechReg = (window as any).webkitSpeechRecognition || (window as any).SpeechRecognition;
+      const recognition = new SpeechReg();
       recognition.continuous = true;
       recognition.interimResults = true;
       recognition.lang = "en-US";
@@ -108,25 +118,20 @@ export function TextPracticeCard({
       };
 
       recognition.onerror = (event: any) => {
-        console.error("Speech recognition error", event.error);
+        console.error("Mic Error:", event.error);
         if (event.error === 'not-allowed') {
-          toast.error("Permission denied. Look for the 'Settings' icon in your address bar (top left) to enable your microphone.");
-        } else if (event.error === 'network') {
-          toast.error("Network error. Please check your internet connection.");
-        } else {
-          toast.error(`Mic error: ${event.error}`);
+          toast.error("Permission reset needed. Please check your browser settings (top left icon).");
         }
         setIsRecording(false);
       };
 
-      recognition.onend = () => {
-        setIsRecording(false);
-      };
-
+      recognition.onend = () => setIsRecording(false);
       recognition.start();
       recognitionRef.current = recognition;
+
     } catch (err) {
-      console.warn("Recording start failed", err);
+      console.error("Mic start failed", err);
+      toast.error("Could not start microphone.");
     }
   };
 
@@ -144,11 +149,8 @@ export function TextPracticeCard({
     setBusy(true);
     setFb(null);
     try {
-      // Robustly ensure module is a valid string for the AI
       const activeModule = String(module || "communication").toLowerCase() as any;
       const activePrompt = String(prompt || "Practice Session");
-
-      console.log("Submitting to AI:", { module: activeModule, prompt: activePrompt });
       
       const result = await feedbackService.analyze({ 
         module: activeModule, 
